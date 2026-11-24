@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Buket Bunga ASCII</title>
+<meta name="description" content="Buket bunga yang setiap kelopaknya tersusun dari huruf.">
+<meta property="og:title" content="Buket Bunga ASCII">
+<meta property="og:description" content="Buket bunga yang setiap kelopaknya tersusun dari huruf.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://alivioreypha-cmyk.github.io/buket/">
+<meta property="og:image" content="https://alivioreypha-cmyk.github.io/buket/preview.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#000000">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cg fill='%238cc2ff'%3E%3Ccircle cx='16' cy='8' r='6'/%3E%3Ccircle cx='24' cy='14' r='6'/%3E%3Ccircle cx='21' cy='23' r='6'/%3E%3Ccircle cx='11' cy='23' r='6'/%3E%3Ccircle cx='8' cy='14' r='6'/%3E%3C/g%3E%3Ccircle cx='16' cy='16' r='4' fill='%23ffffff'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* VOICE: tenang dan lembut, seperti kartu hadiah kecil.
+   IDEA: kartu ucapan dengan jendela malam tempat buket mekar.
+   PICTURE: buket bunga ASCII yang mekar, mengisi hampir seluruh layar ponsel.
+   COLOUR and TYPE: dasar hitam malam, aksen biru dari buketnya; IBM Plex Mono (huruf terminal).
+   LAYOUT: satu kolom di tengah: buket, satu baris keterangan, satu tombol. */
+:root{color-scheme:dark;--bg:#000;--ink:#dce6f4;--muted:#8a99b0;--accent:#8cc2ff;--line:#26344a}
+:root[data-theme=light],:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+html{background:var(--bg)}
+body{margin:0;min-height:100vh;min-height:100svh;background:var(--bg);color:var(--ink);
+  font:16px/1.55 "IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;overflow-x:clip;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:clamp(10px,2vh,18px);padding:clamp(10px,2.5vh,28px) 16px}
+.stage{position:relative;width:min(100%,calc(80vh * 1080 / 1926));width:min(100%,calc(80svh * 1080 / 1926));
+  aspect-ratio:1080/1926;background:#000 center/cover no-repeat;border-radius:14px;overflow:hidden}
+.stage video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:transparent;
+  transition:opacity .35s ease}
+.stage video.off{opacity:0;pointer-events:none}
+.play{position:absolute;inset:0;margin:auto;width:max-content;height:max-content;display:none;
+  align-items:center;gap:10px;padding:14px 22px;border-radius:999px;border:1px solid var(--line);
+  background:rgba(4,8,16,.72);color:var(--ink);font-family:inherit;font-weight:500;font-size:16px;line-height:1;cursor:pointer}
+.play.show{display:flex}
+.play svg{width:16px;height:16px;fill:var(--accent)}
+.note{margin:0;color:var(--muted);font-size:14px;text-align:center;max-width:36ch;text-wrap:balance}
+.again{min-height:44px;padding:10px 20px;border-radius:999px;border:1px solid var(--line);background:#070b14;
+  color:var(--ink);font-family:inherit;font-weight:500;font-size:15px;line-height:1;cursor:pointer;display:inline-flex;
+  align-items:center;gap:10px}
+.again svg{width:16px;height:16px;fill:none;stroke:var(--accent);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.again:hover,.play:hover{border-color:var(--accent)}
+.again:focus-visible,.play:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.msg{min-height:1.4em;margin:0;color:var(--muted);font-size:13px;text-align:center}
+@media (prefers-reduced-motion:reduce){.stage video{transition:none}}
+</style>
+</head>
+<body>
+<div class="stage" id="stage">
+  <video id="intro" muted playsinline preload="auto"
+    aria-label="Animasi buket bunga biru, putih, dan pink yang mekar, tersusun dari huruf"></video>
+  <video id="loop" class="off" muted playsinline loop preload="auto" aria-hidden="true"></video>
+  <button class="play" id="play" type="button">
+    <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 2.5v11l9-5.5z"/></svg>Putar
+  </button>
+</div>
+<p class="note">Buket bunga yang setiap kelopaknya tersusun dari huruf.</p>
+<button class="again" id="again" type="button">
+  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>Mekar lagi
+</button>
+<p class="msg" id="msg" role="status"></p>
+<script>
+{
+  const FILES = { poster: 'poster-biru.jpg', intro: 'intro-biru.mp4', loop: 'loop-biru.mp4' };
+  const stage = document.getElementById('stage');
+  const intro = document.getElementById('intro');
+  const loop = document.getElementById('loop');
+  const playBtn = document.getElementById('play');
+  const again = document.getElementById('again');
+  const msg = document.getElementById('msg');
+  const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let introReady = false, loopReady = false, waitingForLoop = false;
+
+  // File diambil dulu ke memori lalu diputar dari sana (cara yang diizinkan di halaman ini)
+  async function load(url, type, onProgress) {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const total = Number(res.headers.get('content-length')) || 0;
+    if (!res.body || !total || !onProgress) return URL.createObjectURL(new Blob([await res.blob()], { type }));
+    const reader = res.body.getReader();
+    const parts = [];
+    let got = 0;
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      parts.push(value);
+      got += value.length;
+      onProgress(got / total);
+    }
+    return URL.createObjectURL(new Blob(parts, { type }));
+  }
+
+  function start() {
+    if (!introReady) return;
+    playBtn.classList.remove('show');
+    const p = intro.play();
+    if (p && p.catch) p.catch(() => playBtn.classList.add('show'));
+  }
+
+  function showLoop() {
+    loop.currentTime = 0;
+    const p = loop.play();
+    const swap = () => { loop.classList.remove('off'); intro.classList.add('off'); };
+    if (p && p.then) p.then(swap, () => {}); else swap();
+  }
+
+  // Setelah mekar, pindah ke bagian yang berulang (bunganya tetap mekar)
+  intro.addEventListener('ended', () => {
+    if (loopReady) showLoop(); else waitingForLoop = true;
+  });
+
+  function replay() {
+    if (!introReady) return;
+    waitingForLoop = false;
+    loop.pause();
+    intro.classList.remove('off');
+    loop.classList.add('off');
+    intro.currentTime = 0;
+    start();
+  }
+  again.addEventListener('click', replay);
+  playBtn.addEventListener('click', start);
+
+  (async () => {
+    try {
+      const poster = await load(FILES.poster, 'image/jpeg');
+      stage.style.backgroundImage = 'url("' + poster + '")';
+      intro.poster = poster;
+    } catch (e) { /* tanpa gambar sampul pun tetap jalan */ }
+    try {
+      msg.textContent = 'Menyiapkan bunga…';
+      intro.src = await load(FILES.intro, 'video/mp4',
+        f => { msg.textContent = 'Menyiapkan bunga… ' + Math.round(f * 100) + '%'; });
+      introReady = true;
+      msg.textContent = '';
+      if (reduce) playBtn.classList.add('show'); else start();
+    } catch (e) {
+      msg.textContent = 'Bunganya belum bisa dimuat. Coba muat ulang halaman.';
+      return;
+    }
+    try {
+      loop.src = await load(FILES.loop, 'video/mp4');
+      loopReady = true;
+      if (waitingForLoop) { waitingForLoop = false; showLoop(); }
+    } catch (e) { /* kalau gagal, bunga berhenti di frame terakhir yang sudah mekar */ }
+  })();
+}
+</script>
+</body>
+</html>
