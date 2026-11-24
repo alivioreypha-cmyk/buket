@@ -4,9 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Buket Bunga ASCII</title>
-<meta name="description" content="Buket bunga yang setiap kelopaknya tersusun dari huruf.">
 <meta property="og:title" content="Buket Bunga ASCII">
-<meta property="og:description" content="Buket bunga yang setiap kelopaknya tersusun dari huruf.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://alivioreypha-cmyk.github.io/buket/">
 <meta property="og:image" content="https://alivioreypha-cmyk.github.io/buket/preview.jpg">
@@ -23,7 +21,7 @@
    IDEA: kartu ucapan dengan jendela malam tempat buket mekar.
    PICTURE: buket bunga ASCII yang mekar, mengisi hampir seluruh layar ponsel.
    COLOUR and TYPE: dasar hitam malam, aksen biru dari buketnya; IBM Plex Mono (huruf terminal).
-   LAYOUT: satu kolom di tengah: buket, satu baris keterangan, satu tombol. */
+   LAYOUT: cuma buketnya, di tengah layar. */
 :root{color-scheme:dark;--bg:#000;--ink:#dce6f4;--muted:#8a99b0;--accent:#8cc2ff;--line:#26344a}
 :root[data-theme=light],:root[data-theme=dark]{color-scheme:dark}
 *{box-sizing:border-box;min-width:0}
@@ -31,8 +29,8 @@ html{background:var(--bg)}
 body{margin:0;min-height:100vh;min-height:100svh;background:var(--bg);color:var(--ink);
   font:16px/1.55 "IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;overflow-x:clip;
   display:flex;flex-direction:column;align-items:center;justify-content:center;
-  gap:clamp(10px,2vh,18px);padding:clamp(10px,2.5vh,28px) 16px}
-.stage{position:relative;width:min(100%,calc(80vh * 1080 / 1926));width:min(100%,calc(80svh * 1080 / 1926));
+  padding:clamp(8px,2vh,24px) 12px}
+.stage{position:relative;width:min(100%,calc(94vh * 1080 / 1926));width:min(100%,calc(94svh * 1080 / 1926));
   aspect-ratio:1080/1926;background:#000 center/cover no-repeat;border-radius:14px;overflow:hidden}
 .stage video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:transparent;
   transition:opacity .35s ease}
@@ -42,14 +40,10 @@ body{margin:0;min-height:100vh;min-height:100svh;background:var(--bg);color:var(
   background:rgba(4,8,16,.72);color:var(--ink);font-family:inherit;font-weight:500;font-size:16px;line-height:1;cursor:pointer}
 .play.show{display:flex}
 .play svg{width:16px;height:16px;fill:var(--accent)}
-.note{margin:0;color:var(--muted);font-size:14px;text-align:center;max-width:36ch;text-wrap:balance}
-.again{min-height:44px;padding:10px 20px;border-radius:999px;border:1px solid var(--line);background:#070b14;
-  color:var(--ink);font-family:inherit;font-weight:500;font-size:15px;line-height:1;cursor:pointer;display:inline-flex;
-  align-items:center;gap:10px}
-.again svg{width:16px;height:16px;fill:none;stroke:var(--accent);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.again:hover,.play:hover{border-color:var(--accent)}
-.again:focus-visible,.play:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
-.msg{min-height:1.4em;margin:0;color:var(--muted);font-size:13px;text-align:center}
+.play:hover{border-color:var(--accent)}
+.play:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.msg{position:absolute;left:0;right:0;bottom:6%;margin:0;color:var(--muted);font-size:13px;text-align:center}
+.msg:empty{display:none}
 @media (prefers-reduced-motion:reduce){.stage video{transition:none}}
 </style>
 </head>
@@ -61,12 +55,8 @@ body{margin:0;min-height:100vh;min-height:100svh;background:var(--bg);color:var(
   <button class="play" id="play" type="button">
     <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 2.5v11l9-5.5z"/></svg>Putar
   </button>
+  <p class="msg" id="msg" role="status"></p>
 </div>
-<p class="note">Buket bunga yang setiap kelopaknya tersusun dari huruf.</p>
-<button class="again" id="again" type="button">
-  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>Mekar lagi
-</button>
-<p class="msg" id="msg" role="status"></p>
 <script>
 {
   const FILES = { poster: 'poster-biru.jpg', intro: 'intro-biru.mp4', loop: 'loop-biru.mp4' };
@@ -74,7 +64,6 @@ body{margin:0;min-height:100vh;min-height:100svh;background:var(--bg);color:var(
   const intro = document.getElementById('intro');
   const loop = document.getElementById('loop');
   const playBtn = document.getElementById('play');
-  const again = document.getElementById('again');
   const msg = document.getElementById('msg');
   const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   let introReady = false, loopReady = false, waitingForLoop = false;
@@ -117,16 +106,6 @@ body{margin:0;min-height:100vh;min-height:100svh;background:var(--bg);color:var(
     if (loopReady) showLoop(); else waitingForLoop = true;
   });
 
-  function replay() {
-    if (!introReady) return;
-    waitingForLoop = false;
-    loop.pause();
-    intro.classList.remove('off');
-    loop.classList.add('off');
-    intro.currentTime = 0;
-    start();
-  }
-  again.addEventListener('click', replay);
   playBtn.addEventListener('click', start);
 
   (async () => {
